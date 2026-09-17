@@ -66,9 +66,15 @@ for snap_id, group in domains.groupby("snapshot_id"):
                     shares_ns.append({"src": did, "dst": ns_id[ns_str]})
         if d in whois_lookup.index:
             r = whois_lookup.loc[d, "registrar"]
-            if pd.notna(r) and str(r) in reg_id:
-                registered_by.append({"src": did, "dst": reg_id[str(r)]})
 
+            if isinstance(r, pd.Series):
+                r = r.iloc[0]
+
+            if pd.notna(r) and str(r) in reg_id:
+                registered_by.append({
+                    "src": did,
+                    "dst": reg_id[str(r)]
+                })
     pd.DataFrame(resolves_to).drop_duplicates().to_csv(out_dir / "edges_resolves_to.csv", index=False)
     pd.DataFrame(shares_ns).drop_duplicates().to_csv(out_dir / "edges_shares_ns.csv", index=False)
     pd.DataFrame(registered_by).drop_duplicates().to_csv(out_dir / "edges_registered_by.csv", index=False)
