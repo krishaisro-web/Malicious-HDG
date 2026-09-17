@@ -41,6 +41,8 @@ The pipeline creates weekly heterogeneous graph snapshots.
 After placing the raw JSON files:
 
 ```bash
+python src/scripts/00_check_dataset.py
+
 python src/scripts/01_parse_zenodo_unified.py
 python src/scripts/02_build_node_tables.py
 python src/scripts/03_build_edges_snapshots.py
