@@ -5,3 +5,4 @@ data_raw/
 data_processed/
 models/checkpoints/
 *.ptresults_paper_ready.zip
+venv/
