@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+SEED = int(sys.argv[1]) if len(sys.argv) > 1 else 42
 
 snapshot_files = sorted(Path("data_processed/graphs").glob("snapshot_*.pt"),
                          key=lambda p: int(p.stem.split("_")[1]))
@@ -30,7 +31,7 @@ test_idx_list = load_split("test")
 test_idx = torch.tensor(test_idx_list, dtype=torch.long).to(DEVICE)
 
 model = FullModel(hidden_dim=64, dropout=0.3).to(DEVICE)
-checkpoint = torch.load("models/checkpoints/best_model_seed42.pt", map_location=DEVICE)
+checkpoint = torch.load(f"models/checkpoints/best_model_seed{SEED}.pt", map_location=DEVICE)
 model.load_state_dict(checkpoint["model_state_dict"])
 model.eval()
 
@@ -65,7 +66,7 @@ metrics = {
 Path("results/tables").mkdir(parents=True, exist_ok=True)
 Path("results/figures").mkdir(parents=True, exist_ok=True)
 
-with open("results/tables/test_metrics.json", "w") as f:
+with open(f"results/tables/test_metrics_seed{SEED}.json", "w") as f:
     json.dump(metrics, f, indent=2)
 print(json.dumps(metrics, indent=2))
 
@@ -75,26 +76,26 @@ pred_df = pd.DataFrame({
     "predicted_label": preds,
     "predicted_prob_malicious": probs,
 })
-pred_df.to_csv("results/tables/test_predictions.csv", index=False)
+pred_df.to_csv(f"results/tables/test_predictions_seed{SEED}.csv", index=False)
 
 plt.figure(figsize=(5, 4))
 sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
             xticklabels=["Benign", "Malicious"], yticklabels=["Benign", "Malicious"])
 plt.xlabel("Predicted"); plt.ylabel("True"); plt.title("Confusion Matrix")
-plt.tight_layout(); plt.savefig("results/figures/confusion_matrix.png", dpi=150); plt.close()
+plt.tight_layout(); plt.savefig(f"results/figures/confusion_matrix_seed{SEED}.png", dpi=150); plt.close()
 
 fpr_arr, tpr_arr, _ = roc_curve(true, probs)
 plt.figure(figsize=(5, 4))
 plt.plot(fpr_arr, tpr_arr, label=f"ROC-AUC = {auc:.3f}")
 plt.plot([0, 1], [0, 1], "k--", alpha=0.3)
 plt.xlabel("False Positive Rate"); plt.ylabel("True Positive Rate"); plt.title("ROC Curve")
-plt.legend(); plt.tight_layout(); plt.savefig("results/figures/roc_curve.png", dpi=150); plt.close()
+plt.legend(); plt.tight_layout(); plt.savefig(f"results/figures/roc_curve_seed{SEED}.png", dpi=150); plt.close()
 
 prec_arr, rec_arr, _ = precision_recall_curve(true, probs)
 plt.figure(figsize=(5, 4))
 plt.plot(rec_arr, prec_arr, label=f"PR-AUC = {pr_auc:.3f}")
 plt.xlabel("Recall"); plt.ylabel("Precision"); plt.title("Precision-Recall Curve")
-plt.legend(); plt.tight_layout(); plt.savefig("results/figures/pr_curve.png", dpi=150); plt.close()
+plt.legend(); plt.tight_layout(); plt.savefig(f"results/figures/pr_curve_seed{SEED}.png", dpi=150); plt.close()
 
 # Per-malware-type breakdown (bonus, uses malware_type field)
 domains_full = pd.read_csv("data_processed/enriched/domains.csv")
