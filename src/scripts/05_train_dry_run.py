@@ -13,6 +13,7 @@ snapshot_files = sorted(Path("data_processed/graphs").glob("snapshot_*.pt"),
 snapshots = [torch.load(f, weights_only=False) for f in snapshot_files]
 labels = pd.read_csv("data_processed/graphs/labels.csv")
 y = torch.tensor(labels["y"].values, dtype=torch.long)
+domain_snapshot_id = torch.tensor(pd.read_csv("data_processed/graphs/domain_snapshot_id.csv")["snapshot_id"].values, dtype=torch.long)
 
 model = FullModel(hidden_dim=64)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
@@ -21,7 +22,7 @@ loss_fn = nn.CrossEntropyLoss()
 for epoch in range(5):
     model.train()
     optimizer.zero_grad()
-    out = model(snapshots)
+    out = model(snapshots, domain_snapshot_id)
     loss = loss_fn(out, y)
     loss.backward()
     optimizer.step()
