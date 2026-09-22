@@ -30,7 +30,7 @@ test_idx_list = load_split("test")
 test_idx = torch.tensor(test_idx_list, dtype=torch.long).to(DEVICE)
 
 model = FullModel(hidden_dim=64, dropout=0.3).to(DEVICE)
-checkpoint = torch.load("models/checkpoints/best_model.pt", map_location=DEVICE)
+checkpoint = torch.load("models/checkpoints/best_model_seed42.pt", map_location=DEVICE)
 model.load_state_dict(checkpoint["model_state_dict"])
 model.eval()
 
