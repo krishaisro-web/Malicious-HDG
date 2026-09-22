@@ -29,7 +29,7 @@ train_ids, val_ids, test_ids = load_split("train"), load_split("val"), load_spli
 all_ids = train_ids | val_ids | test_ids
 
 snap_counts = snap_assign["snapshot_id"].value_counts()
-largest_two = snap_counts.nlargest(2).index.tolist()
+largest_two = sorted(snap_counts.index)[-2:]
 holdout_ids = set(snap_assign[snap_assign["snapshot_id"].isin(largest_two)]["node_id"])
 
 temporal_train_pool = list(all_ids - holdout_ids)
